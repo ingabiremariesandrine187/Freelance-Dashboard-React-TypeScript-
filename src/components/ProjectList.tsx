@@ -19,11 +19,11 @@ const ProjectList: React.FC<Props> = ({ projects }) => {
         return (
           <div key={p.id} className="p-4 rounded-lg bg-black/40 border border-white/5 flex items-center justify-between">
             <div>
-              <div className="font-semibold text-yellow-100">{p.title}</div>
-              <div className="text-sm text-yellow-200/80">
+              <div className="font-semibold text-violet-700">{p.title}</div>
+              <div className="text-sm text-white">
                 Client: {client ? client.name : "Client not found"}
               </div>
-              <div className="text-sm text-yellow-200/70">
+              <div className="text-sm text-white">
                 Status: <span className={`${p.status === "completed" ? "font-bold" : ""}`}>{p.status}</span> • Budget: ${p.budget}
               </div>
             </div>
@@ -39,7 +39,7 @@ const ProjectList: React.FC<Props> = ({ projects }) => {
               {p.paymentStatus === "unpaid" && (
                 <button
                   onClick={() => markPaid(p.id)}
-                  className="px-3 py-1 rounded-lg bg-yellow-500 text-black font-medium hover:brightness-95"
+                  className="px-3 py-1 rounded-lg bg-violet-700 text-black font-medium hover:brightness-95"
                 >
                   Mark Paid
                 </button>
