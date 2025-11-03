@@ -43,7 +43,7 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, projects };
     }
 
-      case "UPDATE_PROJECT_STATUS": {
+    case "UPDATE_PROJECT_STATUS": {
       const { projectId, status } = action.payload;
       return {
         ...state,
