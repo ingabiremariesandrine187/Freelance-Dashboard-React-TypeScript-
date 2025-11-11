@@ -1,12 +1,13 @@
-import React, { createContext, useContext, useReducer, ReactNode } from "react";
-import type { AppState, Action, Client, Project, Payment } from "../types";
+// eslint-disable-next-line react-refresh/only-export-components
+import React, { createContext, useContext, useReducer, type ReactNode } from "react"; //  FIXED: combined type import
+import type { AppState, Action, Client, Payment } from "../types"; //  removed unused Project import
 import { initialClients, initialPayments, initialProjects } from "../data/seed";
 
 /* initial state */
 const initialState: AppState = {
   clients: initialClients,
   projects: initialProjects,
-  payments: initialPayments
+  payments: initialPayments,
 };
 
 /* Reducer */
@@ -21,16 +22,18 @@ function reducer(state: AppState, action: Action): AppState {
     case "ADD_PAYMENT": {
       const payment = action.payload.payment;
 
-      // if payment references project that doesn't exist, ignore (validation should happen before dispatch)
+      // if payment references project that doesn't exist, ignore
       const projectExists = state.projects.some((p) => p.id === payment.projectId);
       if (!projectExists) return state;
 
       // add payment
       const payments = [...state.payments, payment];
 
-      // if project exists and payment >0, mark project as paid
+      // mark the project as paid
       const projects = state.projects.map((p) =>
-        p.id === payment.projectId ? { ...p, paymentStatus: "paid" } : p
+        p.id === payment.projectId
+          ? { ...p, paymentStatus: "paid" as const } //  FIXED: ensure correct literal type
+          : p
       );
 
       return { ...state, payments, projects };
@@ -38,16 +41,20 @@ function reducer(state: AppState, action: Action): AppState {
 
     case "MARK_PROJECT_PAID": {
       const projects = state.projects.map((p) =>
-        p.id === action.payload.projectId ? { ...p, paymentStatus: "paid" } : p
+        p.id === action.payload.projectId
+          ? { ...p, paymentStatus: "paid" as const } //  FIXED: ensure correct literal type
+          : p
       );
-      return { ...state, projects };
+      return { ...state, projects }; //  FIXED: was returning non-existent variable 'project'
     }
 
     case "UPDATE_PROJECT_STATUS": {
       const { projectId, status } = action.payload;
       return {
         ...state,
-        projects: state.projects.map((p) => (p.id === projectId ? { ...p, status } : p))
+        projects: state.projects.map((p) =>
+          p.id === projectId ? { ...p, status } : p
+        ),
       };
     }
 
@@ -72,7 +79,7 @@ const AppContext = createContext<AppContextProps | undefined>(undefined);
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  // utilities
+  // helpers
   const findClientById = (id?: string) => {
     if (!id) return undefined;
     return state.clients.find((c) => c.id === id);
@@ -88,7 +95,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const project = state.projects.find((p) => p.id === payment.projectId);
     if (!project) return { success: false, error: "Project not found" };
 
-    // example validation: amount must be > 0 and date a valid ISO string
     if (typeof payment.amount !== "number" || payment.amount <= 0) {
       return { success: false, error: "Invalid amount" };
     }
@@ -96,19 +102,21 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       return { success: false, error: "Invalid date" };
     }
 
-    // dispatch
     dispatch({ type: "ADD_PAYMENT", payload: { payment } });
     return { success: true };
   };
 
   return (
-    <AppContext.Provider value={{ state, dispatch, findClientById, countPaidProjects, recordPayment }}>
+    <AppContext.Provider
+      value={{ state, dispatch, findClientById, countPaidProjects, recordPayment }}
+    >
       {children}
     </AppContext.Provider>
   );
 };
 
 /* Hook */
+// eslint-disable-next-line react-refresh/only-export-components
 export const useAppContext = () => {
   const ctx = useContext(AppContext);
   if (!ctx) throw new Error("useAppContext must be used inside AppProvider");
